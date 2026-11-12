@@ -90,8 +90,11 @@ npm run android:release  # release APKs, one per CPU architecture + universal
 
 ### Releases
 
-[`.github/workflows/android-release.yml`](.github/workflows/android-release.yml) builds and publishes a GitHub Release
-whenever you push a version tag (or run it from the Actions tab):
+Android is built in the cloud by [`.github/workflows/android.yml`](.github/workflows/android.yml):
+
+- **every push to `main` and every pull request** builds the signed APKs — download them from the run's
+  **Artifacts** on the Actions tab;
+- **a version tag** (or *Run workflow* with a version) also publishes a GitHub Release:
 
 ```bash
 git tag v1.0.0
