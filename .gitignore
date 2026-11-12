@@ -24,3 +24,4 @@ Thumbs.db
 # Android release signing (key + passwords) — back these up, never commit them
 android/signing/
 .vercel
+.env*
