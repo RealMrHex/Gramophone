@@ -1,0 +1,39 @@
+{
+  "name": "Gramophone",
+  "short_name": "Gramophone",
+  "description": "A vinyl music player that reads the melody, hooks and beat of your songs.",
+  "start_url": "./",
+  "scope": "./",
+  "display_override": [
+    "window-controls-overlay",
+    "standalone"
+  ],
+  "display": "standalone",
+  "orientation": "any",
+  "background_color": "#0c0a0b",
+  "theme_color": "#0c0a0b",
+  "categories": [
+    "music",
+    "entertainment"
+  ],
+  "icons": [
+    {
+      "src": "icons/icon-192.png",
+      "sizes": "192x192",
+      "type": "image/png",
+      "purpose": "any"
+    },
+    {
+      "src": "icons/icon-512.png",
+      "sizes": "512x512",
+      "type": "image/png",
+      "purpose": "any"
+    },
+    {
+      "src": "icons/maskable-512.png",
+      "sizes": "512x512",
+      "type": "image/png",
+      "purpose": "maskable"
+    }
+  ]
+}

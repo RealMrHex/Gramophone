@@ -1,0 +1,19 @@
+:root {
+  --bg: #050506;
+  --fg: #f4f4f5;
+  --dim: #4d4d52;
+  --coral: #ff7a59;
+  --violet: #8b5cf6;
+  --pink: #f472b6;
+  --mono: "JetBrains Mono", "SF Mono", ui-monospace, Menlo, monospace;
+}
+* { box-sizing: border-box; }
+html, body, #app { margin: 0; height: 100%; background: var(--bg); color: var(--fg); overflow: hidden;
+  font-family: ui-sans-serif, -apple-system, "Inter", system-ui, sans-serif; }
+button { font: inherit; }
+/* touch: no rubber-band page bounce, no double-tap zoom or grey tap flashes */
+html, body { overscroll-behavior: none; touch-action: manipulation; -webkit-tap-highlight-color: transparent; }
+/* an app, not a document: no text selection or image dragging anywhere — except where you type */
+* { -webkit-user-select: none; user-select: none; -webkit-touch-callout: none; }
+img { -webkit-user-drag: none; }
+input, textarea, [contenteditable="true"] { -webkit-user-select: text; user-select: text; -webkit-touch-callout: default; }

@@ -1,0 +1,26 @@
+# dependencies & builds
+node_modules
+dist
+release/
+*.apk
+*.aab
+*.log
+
+# signing material never goes in the repo
+*.jks
+*.keystore
+keystore.properties
+
+# OS / editor
+.DS_Store
+Thumbs.db
+.idea
+.vscode/*
+!.vscode/extensions.json
+
+# local tooling
+.claude/
+
+# Android release signing (key + passwords) — back these up, never commit them
+android/signing/
+.vercel

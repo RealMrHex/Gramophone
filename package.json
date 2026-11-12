@@ -1,0 +1,41 @@
+{
+  "name": "gramophone",
+  "private": true,
+  "version": "1.0.0",
+  "description": "A vinyl music player that reads the melody, hooks, key and tempo of your songs and plays them on a spinning record.",
+  "license": "CC-BY-4.0",
+  "author": "Hex (https://github.com/RealMrHex)",
+  "homepage": "https://gramophone.arminnotes.com",
+  "type": "module",
+  "engines": {
+    "node": ">=20.19"
+  },
+  "scripts": {
+    "dev": "vite --port 5183 --strictPort",
+    "build": "vue-tsc --noEmit && vite build",
+    "preview": "vite preview",
+    "typecheck": "vue-tsc --noEmit",
+    "icons": "sh scripts/make-icons.sh",
+    "icons:android": "sh scripts/make-android-icons.sh",
+    "android": "npm run build && npx cap sync android",
+    "android:apk": "npm run android && cd android && ./gradlew assembleDebug",
+    "android:release": "npm run android && cd android && ./gradlew assembleRelease",
+    "android:run": "npm run android && npx cap run android",
+    "banners": "sh scripts/make-banners.sh"
+  },
+  "dependencies": {
+    "@capacitor/android": "^8.6.0",
+    "@capacitor/core": "^8.6.0",
+    "lucide-vue-next": "^1.0.0",
+    "three": "^0.187.0",
+    "vue": "^3.5.45"
+  },
+  "devDependencies": {
+    "@capacitor/cli": "^8.6.0",
+    "@types/three": "^0.187.0",
+    "@vitejs/plugin-vue": "^6.0.11",
+    "typescript": "^6.0.3",
+    "vite": "^8.3.8",
+    "vue-tsc": "^3.3.14"
+  }
+}
