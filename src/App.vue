@@ -67,11 +67,16 @@ const onPick = (e: Event) => {
  * on narrow windows it centres in that gap and wraps instead of running into the record
  */
 const freeBox = computed(() => {
-  // phones: centred in the melody band under the record
-  if (layout.mobile) return { x: Math.round(layout.W / 2), w: Math.round(layout.W - 40), y: Math.round((layout.lanesTop + layout.H - layout.lanesBottom) / 2) }
-  const gapL = layout.R * 1.18, gapR = layout.W - layout.side, want = 380
-  if (gapR - gapL < want) return { x: Math.round((gapL + gapR) / 2), w: Math.max(180, Math.round(gapR - gapL - 24)), y: layout.H / 2 }
-  return { x: Math.round(Math.min(gapR - want / 2, Math.max(gapL + want / 2, layout.W / 2))), w: want, y: layout.H / 2 }
+  // phones: top-anchored just below the whole deck (record, ring and the parked tonearm, which hangs ~1.6R below the
+  // record's centre) so nothing overlaps; compact when the screen is short (Safari with its toolbars showing)
+  if (layout.mobile) {
+    const top = Math.round(layout.cy + layout.R * 1.62 + 6)
+    return { x: Math.round(layout.W / 2), w: Math.round(layout.W - 40), y: top, top: true, compact: layout.H - top < 430 }
+  }
+  // desktop: wide enough that the hint (files · folder · links) stays on one line
+  const gapL = layout.R * 1.18, gapR = layout.W - layout.side, want = 560
+  if (gapR - gapL < want) return { x: Math.round((gapL + gapR) / 2), w: Math.max(180, Math.round(gapR - gapL - 24)), y: layout.H / 2, top: false, compact: false }
+  return { x: Math.round(Math.min(gapR - want / 2, Math.max(gapL + want / 2, layout.W / 2))), w: want, y: layout.H / 2, top: false, compact: false }
 })
 const emptyX = computed(() => freeBox.value.x)
 /** above the collapsed player sheet on phones */
@@ -172,9 +177,9 @@ onBeforeUnmount(() => { removeEventListener('resize', updateLayout); removeEvent
     <SettingsDialog />
 
     <Transition name="fade">
-      <div v-if="!current && !viewTracks.length && !status.loading" class="empty" :style="{ left: emptyX + 'px', top: freeBox.y + 'px', maxWidth: freeBox.w + 'px' }">
+      <div v-if="!current && !viewTracks.length && !status.loading" class="empty" :class="{ anchored: freeBox.top }" :style="{ left: emptyX + 'px', top: freeBox.y + 'px', maxWidth: freeBox.w + 'px' }">
         <!-- phones: a small onboarding card — one clear primary action, two quiet alternatives -->
-        <div v-if="layout.mobile" class="onboard">
+        <div v-if="layout.mobile" class="onboard" :class="{ compact: freeBox.compact }">
           <span class="badge" :class="{ warn: onboard.warn }" aria-hidden="true">
             <component :is="onboard.warn ? RotateCcw : isNative ? Smartphone : Music" :size="26" :stroke-width="1.7" />
           </span>
@@ -207,7 +212,7 @@ onBeforeUnmount(() => { removeEventListener('resize', updateLayout); removeEvent
       </div>
     </Transition>
 
-    <footer class="credit" :style="{ left: emptyX + 'px', bottom: (layout.mobile ? bottomY + 12 : 18) + 'px' }">
+    <footer v-show="!(layout.mobile && !current && !viewTracks.length)" class="credit" :style="{ left: emptyX + 'px', bottom: (layout.mobile ? bottomY + 12 : 18) + 'px' }">
       built with <span class="heart">&#x2665;&#xFE0E;</span> by Hex
       <span class="sep">·</span>
       <a href="https://github.com/RealMrHex/" target="_blank" rel="noopener noreferrer">GitHub</a>
@@ -260,6 +265,15 @@ onBeforeUnmount(() => { removeEventListener('resize', updateLayout); removeEvent
   background: rgba(255, 255, 255, .05); border: 1px solid rgba(255, 255, 255, .08); }
 .onboard .alt svg { color: #ffa48c; }
 .onboard .badge.warn { color: #ffc9a8; }
+.empty.anchored { transform: translate(-50%, 0); padding-top: 4px; }
+/* short screens: no badge, tighter spacing — the whole card fits under the deck */
+.onboard.compact .badge { display: none; }
+.onboard.compact h2 { margin-top: 0; font-size: 20px; }
+.onboard.compact p { font-size: 13.5px; margin-top: 6px; }
+.onboard.compact .primary { margin-top: 16px; height: 48px; }
+.onboard.compact .alts { margin-top: 8px; }
+.onboard.compact .alt { height: 42px; }
+.onboard.compact .tert { margin-top: 6px; }
 .onboard .primary:disabled { opacity: .7; pointer-events: none; }
 .onboard .spin { width: 16px; height: 16px; border-radius: 50%; border: 2px solid rgba(29, 19, 22, .25); border-top-color: #1d1316; animation: spin .8s linear infinite; }
 @keyframes spin { to { transform: rotate(360deg); } }

@@ -55,7 +55,8 @@ export function updateLayout() {
     // phone GPUs: 1.75× is indistinguishable from 2× on a moving record and paints ~25% fewer pixels
     if (matchMedia('(pointer: coarse)').matches) layout.DPR = Math.min(dprCap, 1.75, devicePixelRatio || 1)
     layout.rot = Math.PI / 2
-    layout.R = Math.max(12, Math.min(W * 0.5, H * 0.3))
+    // short screens (e.g. Safari with its toolbars) get a slightly smaller record so the rest still fits
+    layout.R = Math.max(12, Math.min(W * 0.5, H * (H < 740 ? 0.26 : 0.3)))
     // centred; when the width is what limits the record, the arm pivot lands right on the edge
     layout.cx = W / 2
     layout.cy = safe.top * 0.5 + layout.R * 0.3

@@ -121,15 +121,15 @@ const onKey = (e: KeyboardEvent) => { if (e.key === 'Escape') { e.preventDefault
 <style scoped>
 .sd-wrap { position: fixed; inset: 0; z-index: 60; display: grid; place-items: center; padding: 20px;
   background: rgba(5, 4, 5, .55); backdrop-filter: blur(8px); }
-.sd { width: min(480px, 100%); max-height: min(720px, calc(100vh - 40px)); display: flex; flex-direction: column; box-sizing: border-box;
+.sd { width: min(480px, 100%); max-height: min(720px, calc(100vh - 40px)); max-height: min(720px, calc(100dvh - 40px)); display: flex; flex-direction: column; box-sizing: border-box;
   border-radius: 20px; background: linear-gradient(180deg, rgba(34, 29, 32, .98), rgba(20, 17, 19, .98)); border: 1px solid rgba(255, 255, 255, .08);
   box-shadow: 0 30px 70px rgba(0, 0, 0, .6); color: #e6e0e2; font: 14px ui-sans-serif, -apple-system, "Inter", system-ui, sans-serif; overflow: hidden; }
-header { display: flex; align-items: center; gap: 12px; padding: 18px 18px 14px 20px; border-bottom: 1px solid rgba(255, 255, 255, .06); }
+header { flex: none; display: flex; align-items: center; gap: 12px; padding: 18px 18px 14px 20px; border-bottom: 1px solid rgba(255, 255, 255, .06); }
 .badge { width: 34px; height: 34px; border-radius: 10px; display: grid; place-items: center; color: #ffb39f; background: rgba(255, 122, 89, .12); }
 h2 { flex: 1; margin: 0; font-size: 17px; font-weight: 600; color: #f6f3f4; }
 .x { all: unset; width: 36px; height: 36px; display: grid; place-items: center; border-radius: 50%; color: #8f888f; cursor: pointer; }
 .x:hover { background: rgba(255, 255, 255, .06); color: #fff; }
-.scroll { overflow-y: auto; overscroll-behavior: contain; padding: 6px 20px 20px; scrollbar-width: thin; scrollbar-color: rgba(255, 255, 255, .14) transparent; }
+.scroll { flex: 1 1 auto; min-height: 0; overflow-y: auto; -webkit-overflow-scrolling: touch; touch-action: pan-y; overscroll-behavior: contain; padding: 6px 20px 20px; scrollbar-width: thin; scrollbar-color: rgba(255, 255, 255, .14) transparent; }
 section { padding: 14px 0 6px; }
 section + section { border-top: 1px solid rgba(255, 255, 255, .05); }
 h3 { margin: 0 0 6px; font-size: 11px; font-weight: 600; letter-spacing: .12em; text-transform: uppercase; color: #8b7f84; }
@@ -162,7 +162,7 @@ h3 { margin: 0 0 6px; font-size: 11px; font-weight: 600; letter-spacing: .12em; 
 .about .lic { color: #6f676a; }
 /* phones: a sheet from the bottom with big targets */
 .sd-wrap.mobile { place-items: end stretch; padding: 0; }
-.mobile .sd { width: 100%; max-height: calc(100vh - 40px); border-radius: 22px 22px 0 0; }
+.mobile .sd { width: 100%; max-height: calc(100vh - 40px); max-height: calc(100dvh - 24px); border-radius: 22px 22px 0 0; }
 .mobile .scroll { padding-bottom: calc(24px + env(safe-area-inset-bottom, 0px)); }
 .mobile .btn { height: 44px; }
 .sd-enter-active, .sd-leave-active { transition: opacity .22s; }

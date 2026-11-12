@@ -85,7 +85,7 @@ function onKey(e: KeyboardEvent) {
 <style scoped>
 .ld-wrap { position: fixed; inset: 0; z-index: 60; display: grid; place-items: center; padding: 20px;
   background: rgba(5, 4, 5, .55); backdrop-filter: blur(8px); }
-.ld { width: min(520px, 100%); box-sizing: border-box; padding: 20px; border-radius: 18px;
+.ld { width: min(520px, 100%); max-height: calc(100vh - 24px); max-height: calc(100dvh - 24px); overflow-y: auto; box-sizing: border-box; padding: 20px; border-radius: 18px;
   background: linear-gradient(180deg, rgba(34, 29, 32, .98), rgba(20, 17, 19, .98)); border: 1px solid rgba(255, 255, 255, .08);
   box-shadow: 0 30px 70px rgba(0, 0, 0, .6); color: #e6e0e2; font: 14px ui-sans-serif, -apple-system, "Inter", system-ui, sans-serif; }
 header { display: flex; gap: 12px; align-items: flex-start; }

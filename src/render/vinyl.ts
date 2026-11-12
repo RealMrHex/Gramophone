@@ -24,6 +24,25 @@ const COZY = ['#b5566c', '#b5566c', '#c9715a', '#dd9a66', '#6b2c45', '#6b2c45', 
  * Marbled coloured-vinyl record texture (rotates rigidly with the disc).
  * With a `look` (from the track's cover art) the marble uses the cover's palette and the label *is* the cover.
  */
+/**
+ * A blurred layer without ctx.filter: draw at `scale` of full size, then scale it back up in smooth steps (each step
+ * at most 2×, so bilinear filtering stays soft instead of blocky).
+ */
+function soft(size: number, scale: number, draw: (x: CanvasRenderingContext2D) => void): HTMLCanvasElement {
+  let c = makeCanvas(Math.max(8, size * scale), Math.max(8, size * scale))
+  const x = c.getContext('2d')!
+  x.scale(c.width / size, c.height / size)
+  draw(x)
+  while (c.width < size) {
+    const w = Math.min(size, c.width * 2)
+    const n = makeCanvas(w, w), nx = n.getContext('2d')!
+    nx.imageSmoothingEnabled = true; nx.imageSmoothingQuality = 'high'
+    nx.drawImage(c, 0, 0, w, w)
+    c = n
+  }
+  return c
+}
+
 export function buildVinyl(title: string, _hue: number, size = 1200, look: RecordLook | null = null): HTMLCanvasElement {
   const c = makeCanvas(size, size), g = c.getContext('2d')!
   const R = size / 2, rnd = mulberry32(hashStr(title) || 1)
@@ -32,30 +51,33 @@ export function buildVinyl(title: string, _hue: number, size = 1200, look: Recor
   g.beginPath(); g.arc(R, R, R - 4, 0, TAU); g.clip()
   g.fillStyle = look?.base ?? '#2a1219'; g.fillRect(0, 0, size, size)
 
-  // soft marbling: fat blurred strokes + blobs
-  g.filter = 'blur(38px)'
-  g.lineCap = 'round'
-  for (let i = 0; i < 16; i++) {
-    const p = () => R + (rnd() - 0.5) * size * 1.1
-    g.strokeStyle = pal[(rnd() * pal.length) | 0]; g.globalAlpha = 0.55 + rnd() * 0.4
-    g.lineWidth = 60 + rnd() * 150
-    g.beginPath(); g.moveTo(p(), p()); g.bezierCurveTo(p(), p(), p(), p(), p(), p()); g.stroke()
-  }
-  for (let i = 0; i < 26; i++) {
-    const a = rnd() * TAU, r = R * (0.2 + rnd() * 0.8)
-    g.globalAlpha = 0.5 + rnd() * 0.4; g.fillStyle = pal[(rnd() * pal.length) | 0]
-    g.save(); g.translate(R + Math.cos(a) * r, R + Math.sin(a) * r); g.rotate(rnd() * TAU); g.scale(1, 0.3 + rnd() * 0.6)
-    g.beginPath(); g.arc(0, 0, 70 + rnd() * 170, 0, TAU); g.fill(); g.restore()
-  }
-  // crisper swirl ribbons
-  g.filter = 'blur(7px)'
-  for (let i = 0; i < 9; i++) {
-    const p = () => R + (rnd() - 0.5) * size
-    g.strokeStyle = pal[(rnd() * pal.length) | 0]; g.globalAlpha = 0.35 + rnd() * 0.3
-    g.lineWidth = 5 + rnd() * 18
-    g.beginPath(); g.moveTo(p(), p()); g.bezierCurveTo(p(), p(), p(), p(), p(), p()); g.stroke()
-  }
-  g.filter = 'none'; g.globalAlpha = 1
+  // soft marbling: fat strokes + blobs, then crisper ribbons — each layer drawn small and scaled up, which blurs
+  // it the same in every browser (Safari ignores ctx.filter, which used to leave hard-edged blobs on iPhones)
+  g.drawImage(soft(size, 1 / 34, x => {
+    x.lineCap = 'round'
+    for (let i = 0; i < 16; i++) {
+      const p = () => R + (rnd() - 0.5) * size * 1.1
+      x.strokeStyle = pal[(rnd() * pal.length) | 0]; x.globalAlpha = 0.55 + rnd() * 0.4
+      x.lineWidth = 60 + rnd() * 150
+      x.beginPath(); x.moveTo(p(), p()); x.bezierCurveTo(p(), p(), p(), p(), p(), p()); x.stroke()
+    }
+    for (let i = 0; i < 26; i++) {
+      const a = rnd() * TAU, r = R * (0.2 + rnd() * 0.8)
+      x.globalAlpha = 0.5 + rnd() * 0.4; x.fillStyle = pal[(rnd() * pal.length) | 0]
+      x.save(); x.translate(R + Math.cos(a) * r, R + Math.sin(a) * r); x.rotate(rnd() * TAU); x.scale(1, 0.3 + rnd() * 0.6)
+      x.beginPath(); x.arc(0, 0, 70 + rnd() * 170, 0, TAU); x.fill(); x.restore()
+    }
+  }), 0, 0, size, size)
+  g.drawImage(soft(size, 1 / 7, x => {
+    x.lineCap = 'round'
+    for (let i = 0; i < 9; i++) {
+      const p = () => R + (rnd() - 0.5) * size
+      x.strokeStyle = pal[(rnd() * pal.length) | 0]; x.globalAlpha = 0.35 + rnd() * 0.3
+      x.lineWidth = 5 + rnd() * 18
+      x.beginPath(); x.moveTo(p(), p()); x.bezierCurveTo(p(), p(), p(), p(), p(), p()); x.stroke()
+    }
+  }), 0, 0, size, size)
+  g.globalAlpha = 1
 
   // darken slightly toward rim/label so grooves read
   const vg = g.createRadialGradient(R, R, R * 0.3, R, R, R)
