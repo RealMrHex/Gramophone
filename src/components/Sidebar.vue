@@ -221,7 +221,9 @@ function measureRange() {
   rangeRaf = 0
   const sc = scroller(), list = listEl.value
   if (!sc || !list) return
-  const top = list.getBoundingClientRect().top - sc.getBoundingClientRect().top + sc.scrollTop
+  // where the first row sits inside the scroller's content: on phones the sheet body scrolls (the list is somewhere
+  // inside it); on desktop the list scrolls itself, so its rows start at its own top
+  const top = sc === list ? 0 : list.getBoundingClientRect().top - sc.getBoundingClientRect().top + sc.scrollTop
   const y = sc.scrollTop - top, h = sc.clientHeight || 600, n = rows.value.length
   const from = Math.max(0, Math.floor(y / ROW_H.value) - OVERSCAN)
   const to = Math.min(n, Math.ceil((y + h) / ROW_H.value) + OVERSCAN)
