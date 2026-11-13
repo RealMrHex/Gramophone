@@ -21,6 +21,7 @@ import { audio, fadeOut, loadSource, play, playing, seek, setPcm, setVolume, unl
 import { deleteAudio, deleteTrack, loadAll, loadAudio, saveAudio, saveState, saveTrack, saveTracks, whenStorageBlocked, type StoredState, type StoredTrack } from './persist'
 whenStorageBlocked(() => { status.stage = 'close other Gramophone tabs to update'; status.message = 'Gramophone was updated — close its other open tabs to finish.' })
 import { logEvent, lastScan } from './diagLog'
+import { AUDIO_RE } from './files'
 import { settings } from './settings'
 import { deviceArtwork, deviceSrc, isDeviceUrl, isNative, musicAccess, requestMusicAccess, scanDevice } from './native'
 import { checkAudioResponse, download, expandPlaylist, extractUrls, fetchSoon, fileKey, hostOf, isOffline, isPlaylistUrl, LinkError, reasonOf, titleFromUrl, urlKey } from './links'
@@ -70,7 +71,6 @@ export const viewTracks = computed(() => (viewed.value?.trackIds ?? []).map(id =
 export const current = computed(() => (lib.currentId != null ? lib.tracks[lib.currentId] ?? null : null))
 
 let nextTrackId = 1, nextPlaylistId = 1, loadToken = 0
-const AUDIO_RE = /\.(mp3|m4a|aac|flac|wav|ogg|oga|opus|webm|aif|aiff)$/i
 const baseName = (n: string) => n.replace(/\.[^.]+$/, '')
 function hueFor(title: string, key?: string) {
   if (key) { const k = NAMES.indexOf(key.split(' ')[0]); if (k >= 0) return (310 + k * 6) % 360 }

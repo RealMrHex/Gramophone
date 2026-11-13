@@ -13,7 +13,7 @@ import {
   playNext, playTrack, prev, removeDuplicates, removeFromPlaylist, renamePlaylist, retryTrack, reversePlaylist, setVol, status, toggleMute, toggleShuffle, ui,
   ensureArtwork, scanPhone, totalDuration, viewed, viewPlaylist, viewTracks, type Track,
 } from '../composables/library'
-import { collectPicked } from '../composables/files'
+import { AUDIO_ACCEPT, canPickFolders, collectPicked } from '../composables/files'
 import { isDeviceUrl, isNative } from '../composables/native'
 import { settings } from '../composables/settings'
 
@@ -557,9 +557,9 @@ function rowAct(fn: () => void) { fn(); rowOpen.value = false }
     </Popover>
 
     <Popover :anchor="addBtn ?? null" :open="addOpen" align="right" :width="210" @close="addOpen = false">
-      <label class="gm-item"><Music :size="16" /><span class="gm-grow">Add files…</span><input type="file" accept="audio/*" multiple @change="onAdd"></label>
+      <label class="gm-item"><Music :size="16" /><span class="gm-grow">Add files…</span><input type="file" :accept="AUDIO_ACCEPT" multiple @change="onAdd"></label>
       <button v-if="isNative" class="gm-item" @click="scanNow"><Smartphone :size="16" /><span class="gm-grow">Scan this phone</span></button>
-      <label v-if="!isNative" class="gm-item"><FolderPlus :size="16" /><span class="gm-grow">Add a folder…</span><input type="file" webkitdirectory multiple @change="onAdd"></label>
+      <label v-if="!isNative && canPickFolders" class="gm-item"><FolderPlus :size="16" /><span class="gm-grow">Add a folder…</span><input type="file" webkitdirectory multiple @change="onAdd"></label>
       <button class="gm-item" @click="openLinks"><Link2 :size="16" /><span class="gm-grow">Add from links…</span><span v-if="!isNative" class="gm-note">⌘V</span></button>
     </Popover>
 

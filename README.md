@@ -41,7 +41,7 @@
 
 **It's a proper music player**
 - Playlists, queue, shuffle, repeat one / all, play next, drag to reorder, search, volume.
-- Add music by **dropping files or whole folders**, picking files, **pasting links** (single tracks, dozens of them, or `.m3u` / `.pls` playlists) or dragging a link in from another tab.
+- Add music by **dropping files or whole folders**, picking files (many at once on phones too), sharing songs to the installed app from Android's share menu, **pasting links** (single tracks, dozens of them, or `.m3u` / `.pls` playlists) or dragging a link in from another tab.
 - **Duplicate detection** — the same file (even renamed) or the same link is never added twice.
 - **Failure handling** — a track that can't be played (404, not audio, blocked by its host, corrupt) is flagged with the reason and skipped from then on; *Try again* is one tap away.
 - **Fully offline** — your library lives in IndexedDB, link tracks are kept on the device after their first play, and the app itself is precached by a service worker.

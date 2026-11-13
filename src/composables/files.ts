@@ -2,7 +2,20 @@
  * Collecting audio from what the user hands us: dropped files and (nested) folders, or a folder picker.
  * Everything comes back in natural path order ("2 - …" before "10 - …"), hidden/system files skipped.
  */
-const AUDIO_RE = /\.(mp3|m4a|aac|flac|wav|ogg|oga|opus|webm|aif|aiff)$/i
+/** audio file types we can play (the browser decodes them); also used for the pickers' accept lists */
+export const AUDIO_EXTS = ['mp3', 'm4a', 'm4b', 'aac', 'flac', 'wav', 'ogg', 'oga', 'opus', 'webm', 'aif', 'aiff', 'caf']
+export const AUDIO_RE = new RegExp(`\\.(${AUDIO_EXTS.join('|')})$`, 'i')
+/**
+ * For <input type=file accept>: the MIME family *and* every extension. iOS's Files picker greys out MP3 / M4A files
+ * when given only "audio/*" (worst in an installed web app); listing the extensions makes them selectable everywhere.
+ */
+export const AUDIO_ACCEPT = ['audio/*', ...AUDIO_EXTS.map(e => '.' + e)].join(',')
+
+/** phones and tablets: no folder picking for web pages (iOS Safari and Android Chrome ignore webkitdirectory) */
+const ua = typeof navigator !== 'undefined' ? navigator.userAgent : ''
+export const isIOS = /iPhone|iPad|iPod/.test(ua) || (/Macintosh/.test(ua) && typeof navigator !== 'undefined' && navigator.maxTouchPoints > 1)
+export const isAndroid = /Android/.test(ua)
+export const canPickFolders = !isIOS && !isAndroid
 
 interface Found { file: File; path: string }
 

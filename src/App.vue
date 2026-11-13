@@ -17,7 +17,7 @@ import { setupMediaSession } from './composables/mediaSession'
 import { Bug, Link2, Music, RotateCcw, Settings2, Smartphone } from 'lucide-vue-next'
 import { extractUrls } from './composables/links'
 import { layout } from './composables/layout'
-import { collectDropped, collectPicked } from './composables/files'
+import { AUDIO_ACCEPT, canPickFolders, collectDropped, collectPicked, isIOS } from './composables/files'
 
 const grain = ref<HTMLElement>()
 /** one 256² tile of monochrome noise; jittering its offset every couple of frames reads as moving film grain */
@@ -124,6 +124,32 @@ document.addEventListener('visibilitychange', async () => {
   if ((scanState.phase === 'blocked' || scanState.phase === 'denied') && (await musicAccess()).granted) void scanPhone()
 })
 
+/**
+ * Songs or links shared to the installed web app ("Share to Gramophone" on Android): the service worker parked them
+ * in a cache and opened /?share=1 — import them, then clear the cache and the URL.
+ */
+async function importShared() {
+  if (!new URLSearchParams(location.search).has('share') || !('caches' in window)) return
+  history.replaceState(null, '', location.pathname)
+  try {
+    const box = await caches.open('gramophone-share')
+    const files: File[] = []
+    let text = ''
+    for (const req of await box.keys()) {
+      const res = await box.match(req)
+      if (res) {
+        const path = new URL(req.url).pathname
+        if (path.endsWith('/__share/text')) text = await res.text()
+        else files.push(new File([await res.blob()], decodeURIComponent(path.split('/').pop() || 'shared audio'), { type: res.headers.get('content-type') || '' }))
+      }
+      await box.delete(req)
+    }
+    if (files.length) await addFiles(files)
+    if (text && extractUrls(text).length) await addLinks(text)
+    if (!files.length && !text) status.message = 'Nothing to add from that share.'
+  } catch { status.message = 'Couldn’t read what was shared.' }
+}
+
 /** ⌘V / Ctrl+V anywhere (outside text fields): audio files or links from the clipboard go into the playlist */
 const onPaste = (e: ClipboardEvent) => {
   const el = e.target as HTMLElement
@@ -157,6 +183,8 @@ onMounted(async () => {
   status.loading = true; status.stage = 'restoring library'
   await restoreLibrary()
   if (!current.value) status.loading = false
+  // shared to the installed web app from another app (Android share sheet)
+  void importShared()
   // Android app: pick up songs added to the phone since last time (only if music access was already given)
   if (isNative) void scanPhone({ quiet: true })
 })
@@ -190,11 +218,14 @@ onBeforeUnmount(() => { removeEventListener('resize', updateLayout); removeEvent
               <span v-if="scanState.phase === 'scanning'" class="spin" /><component :is="onboard.icon" v-else :size="18" :stroke-width="2" />{{ onboard.action }}
             </button>
           </template>
-          <label v-else class="primary"><Music :size="18" :stroke-width="2" />Choose songs<input type="file" accept="audio/*" multiple @change="onPick"></label>
+          <label v-else class="primary"><Music :size="18" :stroke-width="2" />Choose songs<input type="file" :accept="AUDIO_ACCEPT" multiple @change="onPick"></label>
           <div class="alts">
-            <label v-if="isNative" class="alt"><Music :size="16" :stroke-width="1.9" />Choose files<input type="file" accept="audio/*" multiple @change="onPick"></label>
+            <label v-if="isNative" class="alt"><Music :size="16" :stroke-width="1.9" />Choose files<input type="file" :accept="AUDIO_ACCEPT" multiple @change="onPick"></label>
             <button class="alt" @click="ui.linkDialog = true"><Link2 :size="16" :stroke-width="1.9" />Paste links</button>
           </div>
+          <p v-if="!isNative && !canPickFolders" class="tip">
+            {{ isIOS ? 'Tip: in Files, tap “Select” to pick many songs at once.' : 'Tip: long-press a song in the picker to select many at once — or share songs to Gramophone from your file manager.' }}
+          </p>
           <div class="tert">
             <button v-if="onboard.warn" @click="sendReport"><Bug :size="14" :stroke-width="2" />{{ reportSent || 'Send a report' }}</button>
             <button @click="ui.settings = true"><Settings2 :size="14" :stroke-width="2" />Settings</button>
@@ -203,9 +234,11 @@ onBeforeUnmount(() => { removeEventListener('resize', updateLayout); removeEvent
         <span v-if="!layout.mobile" class="big">Drop music here</span>
         <span v-if="!layout.mobile" class="small">
           files or whole folders — or
-          <label><u>choose files</u><input type="file" accept="audio/*" multiple @change="onPick"></label>
-          ·
-          <label><u>choose a folder</u><input type="file" webkitdirectory multiple @change="onPick"></label>
+          <label><u>choose files</u><input type="file" :accept="AUDIO_ACCEPT" multiple @change="onPick"></label>
+          <template v-if="canPickFolders">
+            ·
+            <label><u>choose a folder</u><input type="file" webkitdirectory multiple @change="onPick"></label>
+          </template>
           ·
           <u class="as-link" role="button" tabindex="0" @click="ui.linkDialog = true" @keydown.enter="ui.linkDialog = true">paste links</u>
         </span>
@@ -277,6 +310,7 @@ onBeforeUnmount(() => { removeEventListener('resize', updateLayout); removeEvent
 .onboard .primary:disabled { opacity: .7; pointer-events: none; }
 .onboard .spin { width: 16px; height: 16px; border-radius: 50%; border: 2px solid rgba(29, 19, 22, .25); border-top-color: #1d1316; animation: spin .8s linear infinite; }
 @keyframes spin { to { transform: rotate(360deg); } }
+.onboard .tip { margin: 12px 0 0; font-size: 12.5px; line-height: 1.5; color: #7d777b; }
 .onboard .tert { display: flex; gap: 6px; justify-content: center; margin-top: 14px; }
 .onboard .tert button { all: unset; display: inline-flex; align-items: center; gap: 6px; padding: 8px 10px; border-radius: 10px; font-size: 13px; color: #8f888d; cursor: pointer; }
 .onboard .tert button:active { background: rgba(255, 255, 255, .06); }
