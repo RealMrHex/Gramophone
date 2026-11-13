@@ -1,7 +1,7 @@
 {
   "name": "gramophone",
   "private": true,
-  "version": "1.0.0",
+  "version": "1.0.1",
   "description": "A vinyl music player that reads the melody, hooks, key and tempo of your songs and plays them on a spinning record.",
   "license": "CC-BY-4.0",
   "author": "Hex (https://github.com/RealMrHex)",
